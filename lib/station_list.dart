@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/play_station.dart';
 import 'package:http/http.dart' as http;
 import 'station.dart';
+import 'play_station.dart';
 
 class StationListPage extends StatefulWidget {
   const StationListPage({super.key});
@@ -111,37 +113,45 @@ class StationCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: color,
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      child: SizedBox(
-          height: 68,
-          child: Row(
-            children: [
-              imageWidget(station),
-              const SizedBox(
-                width: 8,
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    station.name,
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    station.desc,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal),
-                  )
-                ],
-              )
-            ],
-          )),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (context) => const PlayStationPage())
+        );
+      },
+      child: Container(
+        color: color,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        child: SizedBox(
+            height: 68,
+            child: Row(
+              children: [
+                imageWidget(station),
+                const SizedBox(
+                  width: 8,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      station.name,
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      station.desc,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal),
+                    )
+                  ],
+                )
+              ],
+            )),
+      ),
     );
   }
 }
