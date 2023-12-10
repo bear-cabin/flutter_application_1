@@ -94,30 +94,15 @@ class StationCell extends StatelessWidget {
   final Station station;
   final Color color;
 
-  Widget imageWidget(Station station) {
-    if (station.imageURL.startsWith('http')) {
-      return Image.network(station.imageURL);
-    } else if (station.imageURL.endsWith('.png')) {
-      return Image.asset('images/stations/${station.imageURL}');
-    } else if (station.imageURL.isNotEmpty) {
-      return Image.asset(
-        'images/stations/${station.imageURL}.png',
-      );
-    } else {
-      return const SizedBox(
-        width: 115.5,
-        height: 68,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context, 
-          MaterialPageRoute(builder: (context) => const PlayStationPage())
+          MaterialPageRoute(builder: (context) {
+            return PlayStationPage(station: station);
+          })
         );
       },
       child: Container(
@@ -127,7 +112,7 @@ class StationCell extends StatelessWidget {
             height: 68,
             child: Row(
               children: [
-                imageWidget(station),
+                station.imageWidget(),
                 const SizedBox(
                   width: 8,
                 ),
