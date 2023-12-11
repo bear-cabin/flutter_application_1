@@ -1,15 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'station.dart';
 
 class PlayStationPage extends StatefulWidget {
   const PlayStationPage({super.key, required this.station});
   final Station station;
-
   @override
   State<StatefulWidget> createState() => _PlayStationPageState();
 }
 
 class _PlayStationPageState extends State<PlayStationPage> {
+  final _player = AudioPlayer();
+
+  @override
+  void initState() {
+    final uri = Uri.parse(widget.station.streamURL);
+    _player.setAudioSource(AudioSource.uri(uri));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -47,11 +62,55 @@ class _PlayStationPageState extends State<PlayStationPage> {
                   ],
                 ),
               ),
-              const Spacer()
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  StreamBuilder(
+                    stream: _player.playerStateStream, 
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data!.playing) {
+                        return IconButton(
+                          onPressed: () {
+                            _player.pause();
+                          },
+                          icon: Image.asset('images/btn-pause.png')
+                        );
+                      } else {
+                        return IconButton(
+                          onPressed: () {
+                            _player.play();
+                          },
+                          icon: Image.asset('images/btn-play.png')
+                        );
+                      }
+                    }
+                  )
+                ],
+              ),
+              const SizedBox(height: 22),
+              const BottomBar()
             ],
           ),
         )
       ]
+    );
+  }
+}
+
+class BottomBar extends StatelessWidget {
+  const BottomBar({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44,
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Stack(
+        children: [
+          Image.asset('images/btn-share.png')
+        ],
+      )
     );
   }
 }
