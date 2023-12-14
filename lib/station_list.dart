@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/play_station.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_application_1/station_manager.dart';
+import 'package:provider/provider.dart';
 import 'station.dart';
-import 'play_station.dart';
 
 class StationListPage extends StatefulWidget {
   const StationListPage({super.key});
@@ -13,56 +11,51 @@ class StationListPage extends StatefulWidget {
 }
 
 class _StationListPageState extends State<StationListPage> {
-  List<Station> stations = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchStations();
-  }
-
-  fetchStations() async {
-    const urlStr = "https://fethica.com/assets/swift-radio/stations.json";
-    final response = await http.get(Uri.parse(urlStr));
-    Map<String, dynamic> json = jsonDecode(response.body);
-    var stations = <Station>[];
-    for (final obj in json["station"] as List) {
-      var map = obj as Map<String, dynamic>;
-      stations.add(Station.fromJson(map));
-    }
-    setState(() {
-      this.stations = stations;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      Positioned.fill(
-        child: Image.asset(
-          "images/background.png",
-          fit: BoxFit.cover,
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            "images/background.png",
+            fit: BoxFit.cover,
+          ),
         ),
-      ),
-      Column(
-        children: [
-          const TopBar(),
-          ListView.builder(
-              shrinkWrap: true,
-              itemCount: stations.length,
-              itemBuilder: (context, index) {
-                Color color = const Color.fromRGBO(255, 255, 255, 0.1);
-                if (index % 2 != 0) {
-                  color = Colors.transparent;
-                }
-                return StationCell(
-                  station: stations[index],
-                  color: color,
-                );
-              })
-        ],
-      )
-    ]);
+        Column(
+          children: [
+            const TopBar(),
+            Consumer<StationManager>(builder: (context, mgr, child) {
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: mgr.stations.length,
+                itemBuilder: (context, index) {
+                  Color color = const Color.fromRGBO(255, 255, 255, 0.1);
+                  if (index % 2 != 0) {
+                    color = Colors.transparent;
+                  }
+                  return StationCell(
+                    station: mgr.stations[index],
+                    color: color,
+                  );
+                },
+              );
+            }),
+          ],
+        ),
+        Positioned(
+          bottom: 0,
+          child: Consumer<StationManager>(
+            builder: (context, mgr, child) {
+              if (mgr.station == null) {
+                return const Padding(padding: EdgeInsets.only());
+              } else {
+                return const BottomBar();
+              }
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -79,11 +72,58 @@ class TopBar extends StatelessWidget {
             width: 8,
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Station station = StationManager.shared.stations.first;
+              StationManager.shared.replaceStation(station);
+            },
             icon: const Icon(Icons.menu),
             color: Colors.white,
           )
         ],
+      ),
+    );
+  }
+}
+
+class BottomBar extends StatelessWidget {
+  const BottomBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        child: Row(
+          children: [
+            Consumer<StationManager>(
+              builder: (context, mgr, child) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      mgr.station?.name ?? "",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      mgr.station?.name ?? "",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -98,44 +138,52 @@ class StationCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        StationManager.shared.replaceStation(station);
         Navigator.push(
-          context, 
-          MaterialPageRoute(builder: (context) {
-            return PlayStationPage(station: station);
-          })
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return PlayStationPage(station: station);
+            },
+          ),
         );
       },
       child: Container(
         color: color,
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: SizedBox(
-            height: 68,
-            child: Row(
-              children: [
-                station.imageWidget(),
-                const SizedBox(
-                  width: 8,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      station.name,
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+          height: 68,
+          child: Row(
+            children: [
+              station.imageWidget(),
+              const SizedBox(
+                width: 8,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    station.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      station.desc,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.normal),
-                    )
-                  ],
-                )
-              ],
-            )),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    station.desc,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
