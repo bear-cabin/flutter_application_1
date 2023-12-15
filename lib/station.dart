@@ -8,6 +8,7 @@ class Station {
   String name;
   String streamURL;
   String imageURL;
+  String? artworkURL;
   String desc;
   String longDesc;
   factory Station.fromJson(Map<String, dynamic> json) =>
@@ -30,5 +31,4 @@ class Station {
       );
     }
   }
-
 }

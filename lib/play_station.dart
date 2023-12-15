@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 import 'station.dart';
 import 'station_manager.dart';
 
@@ -33,24 +34,67 @@ class _PlayStationPageState extends State<PlayStationPage> {
             Container(
               alignment: Alignment.center,
               height: 333,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  widget.station.imageWidget(height: 111),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    widget.station.desc,
-                    style: const TextStyle(
-                      color: Color.fromRGBO(255, 255, 255, 0.8),
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
+              child: Consumer<StationManager>(
+                builder: (context, mgr, child) {
+                  final url = mgr.station?.artworkURL;
+                  if (url == null) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        widget.station.imageWidget(height: 111),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          widget.station.desc,
+                          style: const TextStyle(
+                            color: Color.fromRGBO(255, 255, 255, 0.8),
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Image.network(
+                      url,
+                      width: 300,
+                      height: 300,
+                      fit: BoxFit.fill,
+                      errorBuilder: (context, obj, stack) {
+                        return const Text("");
+                      },
+                    );
+                  }
+                },
               ),
             ),
             const Spacer(),
+            StreamBuilder(
+              stream: player.icyMetadataStream,
+              builder: (context, snapshot) {
+                final title = snapshot.data?.info?.title ?? "";
+                final strings = title.split('-');
+                return Column(
+                  children: [
+                    Text(
+                      strings.last,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                      ),
+                    ),
+                    Text(
+                      strings.first,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 22),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

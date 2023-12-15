@@ -14,6 +14,22 @@ class StationManager with ChangeNotifier {
 
   StationManager() {
     fetchStations();
+    player.icyMetadataStream.listen((icydata) {
+      fetchArtworkUrl(icydata?.info?.title);
+    });
+  }
+
+  fetchArtworkUrl(String? title) async {
+    if (title == null) return;
+    var urlStr = "https://itunes.apple.com/search?term=$title&entity=song";
+    final response = await http.get(Uri.parse(urlStr));
+    Map<String, dynamic> json = jsonDecode(response.body);
+    List results = json['results'];
+    if (results.first case {'artworkUrl60': String url60}) {
+      // station?.artworkURL = url60.replaceFirst('60x60', '600X600');
+      station?.artworkURL = url60;
+      notifyListeners();
+    }
   }
 
   fetchStations() async {
@@ -32,8 +48,12 @@ class StationManager with ChangeNotifier {
 
   replaceStation(Station station) {
     this.station = station;
-    final uri = Uri.parse(station.streamURL);
-    player.setAudioSource(AudioSource.uri(uri));
+    player.setAudioSource(
+      AudioSource.uri(
+        Uri.parse(station.streamURL),
+        headers: {"Icy-MetaData": "1"},
+      ),
+    );
     notifyListeners();
   }
 }

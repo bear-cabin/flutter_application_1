@@ -21,37 +21,38 @@ class _StationListPageState extends State<StationListPage> {
             fit: BoxFit.cover,
           ),
         ),
-        Column(
-          children: [
-            const TopBar(),
-            Consumer<StationManager>(builder: (context, mgr, child) {
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: mgr.stations.length,
-                itemBuilder: (context, index) {
-                  Color color = const Color.fromRGBO(255, 255, 255, 0.1);
-                  if (index % 2 != 0) {
-                    color = Colors.transparent;
-                  }
-                  return StationCell(
-                    station: mgr.stations[index],
-                    color: color,
+        SafeArea(
+          child: Column(
+            children: [
+              const TopBar(),
+              Expanded(
+                child: Consumer<StationManager>(builder: (context, mgr, child) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: mgr.stations.length,
+                    itemBuilder: (context, index) {
+                      Color color = const Color.fromRGBO(255, 255, 255, 0.1);
+                      if (index % 2 != 0) {
+                        color = Colors.transparent;
+                      }
+                      return StationCell(
+                        station: mgr.stations[index],
+                        color: color,
+                      );
+                    },
                   );
+                }),
+              ),
+              Consumer<StationManager>(
+                builder: (context, mgr, child) {
+                  if (mgr.station == null) {
+                    return const Padding(padding: EdgeInsets.only());
+                  } else {
+                    return BottomBar();
+                  }
                 },
-              );
-            }),
-          ],
-        ),
-        Positioned(
-          bottom: 0,
-          child: Consumer<StationManager>(
-            builder: (context, mgr, child) {
-              if (mgr.station == null) {
-                return const Padding(padding: EdgeInsets.only());
-              } else {
-                return const BottomBar();
-              }
-            },
+              ),
+            ],
           ),
         ),
       ],
@@ -61,7 +62,6 @@ class _StationListPageState extends State<StationListPage> {
 
 class TopBar extends StatelessWidget {
   const TopBar({super.key});
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -86,8 +86,8 @@ class TopBar extends StatelessWidget {
 }
 
 class BottomBar extends StatelessWidget {
-  const BottomBar({super.key});
-
+  BottomBar({super.key});
+  final player = StationManager.shared.player;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -102,12 +102,17 @@ class BottomBar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      mgr.station?.name ?? "",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
+                    StreamBuilder(
+                      stream: player.icyMetadataStream,
+                      builder: (context, snapshot) {
+                        return Text(
+                          snapshot.data?.info?.title ?? "",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 4),
                     Text(
