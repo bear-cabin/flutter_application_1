@@ -11,6 +11,18 @@ class StationListPage extends StatefulWidget {
 }
 
 class _StationListPageState extends State<StationListPage> {
+
+  pushPlayPage(Station station) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return PlayStationPage(station: station);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -22,6 +34,7 @@ class _StationListPageState extends State<StationListPage> {
           ),
         ),
         SafeArea(
+          bottom: false,
           child: Column(
             children: [
               const TopBar(),
@@ -35,22 +48,42 @@ class _StationListPageState extends State<StationListPage> {
                       if (index % 2 != 0) {
                         color = Colors.transparent;
                       }
-                      return StationCell(
-                        station: mgr.stations[index],
-                        color: color,
+                      final station = mgr.stations[index];
+                      return GestureDetector(
+                        onTap: () {
+                          mgr.replaceStation(station);
+                          pushPlayPage(station);
+                        },
+                        child: StationCell(
+                          station: station,
+                          color: color,
+                        ),
                       );
                     },
                   );
                 }),
               ),
-              Consumer<StationManager>(
-                builder: (context, mgr, child) {
-                  if (mgr.station == null) {
-                    return const Padding(padding: EdgeInsets.only());
-                  } else {
-                    return BottomBar();
+              ElevatedButton(
+                onPressed: () {
+                  final station = StationManager.shared.station;
+                  if (station != null) {
+                    pushPlayPage(station);
                   }
                 },
+                style: ButtonStyle(
+                  splashFactory: NoSplash.splashFactory,
+                  backgroundColor: MaterialStateProperty.all(
+                    const Color.fromRGBO(255, 255, 255, 0.1),
+                  ),
+                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                  shape: MaterialStateProperty.all(
+                    const RoundedRectangleBorder(),
+                  ),
+                  padding: MaterialStateProperty.all(
+                    const EdgeInsets.symmetric(horizontal: 15),
+                  ),
+                ),
+                child: BottomBar(),
               ),
             ],
           ),
@@ -58,6 +91,7 @@ class _StationListPageState extends State<StationListPage> {
       ],
     );
   }
+
 }
 
 class TopBar extends StatelessWidget {
@@ -90,45 +124,55 @@ class BottomBar extends StatelessWidget {
   final player = StationManager.shared.player;
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 44,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Row(
-          children: [
-            Consumer<StationManager>(
-              builder: (context, mgr, child) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    StreamBuilder(
-                      stream: player.icyMetadataStream,
-                      builder: (context, snapshot) {
-                        return Text(
-                          snapshot.data?.info?.title ?? "",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      mgr.station?.name ?? "",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                  ],
+    return SafeArea(
+      child: SizedBox(
+        height: 44,
+        child: Consumer<StationManager>(
+            builder: (context, mgr, child) {
+              Widget content;
+              if (mgr.station == null) {
+                content = const Text(
+                  'Choose a station above to begin...',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                  ),
                 );
-              },
-            ),
-          ],
-        ),
+              } else {
+                content = Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      StreamBuilder(
+                        stream: player.icyMetadataStream,
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.data?.info?.title ?? "",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        },
+                      ),
+                      Text(
+                        mgr.station?.name ?? "",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return Row(children: [content]);
+            },
+          ),
       ),
     );
   }
@@ -141,30 +185,19 @@ class StationCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        StationManager.shared.replaceStation(station);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) {
-              return PlayStationPage(station: station);
-            },
-          ),
-        );
-      },
-      child: Container(
-        color: color,
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: SizedBox(
-          height: 68,
-          child: Row(
-            children: [
-              station.imageWidget(),
-              const SizedBox(
-                width: 8,
-              ),
-              Column(
+    return Container(
+      color: color,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      child: SizedBox(
+        height: 68,
+        child: Row(
+          children: [
+            station.imageWidget(),
+            const SizedBox(
+              width: 8,
+            ),
+            Expanded(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -186,8 +219,8 @@ class StationCell extends StatelessWidget {
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

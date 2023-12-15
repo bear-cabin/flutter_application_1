@@ -25,10 +25,12 @@ class StationManager with ChangeNotifier {
     final response = await http.get(Uri.parse(urlStr));
     Map<String, dynamic> json = jsonDecode(response.body);
     List results = json['results'];
-    if (results.first case {'artworkUrl60': String url60}) {
-      // station?.artworkURL = url60.replaceFirst('60x60', '600X600');
-      station?.artworkURL = url60;
-      notifyListeners();
+    if (results.isNotEmpty) {
+      if (results.first case {'artworkUrl60': String url60}) {
+        // station?.artworkURL = url60.replaceFirst('60x60', '600X600');
+        station?.artworkURL = url60;
+        notifyListeners();
+      }
     }
   }
 
@@ -47,6 +49,9 @@ class StationManager with ChangeNotifier {
   }
 
   replaceStation(Station station) {
+    if (station.name == this.station?.name) {
+      return;
+    }
     this.station = station;
     player.setAudioSource(
       AudioSource.uri(

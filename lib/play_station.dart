@@ -22,106 +22,108 @@ class _PlayStationPageState extends State<PlayStationPage> {
           fit: BoxFit.cover,
         ),
       ),
-      Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
+      SafeArea(
+        child: Scaffold(
           backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          title: Text(widget.station.name),
-        ),
-        body: Column(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              height: 333,
-              child: Consumer<StationManager>(
-                builder: (context, mgr, child) {
-                  final url = mgr.station?.artworkURL;
-                  if (url == null) {
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        widget.station.imageWidget(height: 111),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          widget.station.desc,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(255, 255, 255, 0.8),
-                            fontWeight: FontWeight.normal,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            title: Text(widget.station.name),
+          ),
+          body: Column(
+            children: [
+              Container(
+                alignment: Alignment.center,
+                height: 333,
+                child: Consumer<StationManager>(
+                  builder: (context, mgr, child) {
+                    final url = mgr.station?.artworkURL;
+                    if (url == null) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          widget.station.imageWidget(height: 111),
+                          const SizedBox(
+                            height: 20,
                           ),
+                          Text(
+                            widget.station.desc,
+                            style: const TextStyle(
+                              color: Color.fromRGBO(255, 255, 255, 0.8),
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Image.network(
+                        url,
+                        width: 300,
+                        height: 300,
+                        fit: BoxFit.fill,
+                        errorBuilder: (context, obj, stack) {
+                          return const Text("");
+                        },
+                      );
+                    }
+                  },
+                ),
+              ),
+              const Spacer(),
+              StreamBuilder(
+                stream: player.icyMetadataStream,
+                builder: (context, snapshot) {
+                  final title = snapshot.data?.info?.title ?? "";
+                  final strings = title.split('-');
+                  return Column(
+                    children: [
+                      Text(
+                        strings.last,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
                         ),
-                      ],
-                    );
-                  } else {
-                    return Image.network(
-                      url,
-                      width: 300,
-                      height: 300,
-                      fit: BoxFit.fill,
-                      errorBuilder: (context, obj, stack) {
-                        return const Text("");
-                      },
-                    );
-                  }
+                      ),
+                      Text(
+                        strings.first,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  );
                 },
               ),
-            ),
-            const Spacer(),
-            StreamBuilder(
-              stream: player.icyMetadataStream,
-              builder: (context, snapshot) {
-                final title = snapshot.data?.info?.title ?? "";
-                final strings = title.split('-');
-                return Column(
-                  children: [
-                    Text(
-                      strings.last,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                      ),
-                    ),
-                    Text(
-                      strings.first,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 22),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                StreamBuilder(
-                    stream: player.playerStateStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data!.playing) {
-                        return IconButton(
-                          onPressed: () {
-                            player.pause();
-                          },
-                          icon: Image.asset('images/btn-pause.png'),
-                        );
-                      } else {
-                        return IconButton(
-                          onPressed: () {
-                            player.play();
-                          },
-                          icon: Image.asset('images/btn-play.png'),
-                        );
-                      }
-                    })
-              ],
-            ),
-            const SizedBox(height: 22),
-            const BottomBar()
-          ],
+              const SizedBox(height: 22),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  StreamBuilder(
+                      stream: player.playerStateStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data!.playing) {
+                          return IconButton(
+                            onPressed: () {
+                              player.pause();
+                            },
+                            icon: Image.asset('images/btn-pause.png'),
+                          );
+                        } else {
+                          return IconButton(
+                            onPressed: () {
+                              player.play();
+                            },
+                            icon: Image.asset('images/btn-play.png'),
+                          );
+                        }
+                      })
+                ],
+              ),
+              const SizedBox(height: 22),
+              const BottomBar()
+            ],
+          ),
         ),
       )
     ]);
