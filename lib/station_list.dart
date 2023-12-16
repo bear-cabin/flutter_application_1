@@ -3,6 +3,7 @@ import 'package:flutter_application_1/play_station.dart';
 import 'package:flutter_application_1/station_manager.dart';
 import 'package:provider/provider.dart';
 import 'station.dart';
+import 'animated_play.dart';
 
 class StationListPage extends StatefulWidget {
   const StationListPage({super.key});
@@ -83,7 +84,7 @@ class _StationListPageState extends State<StationListPage> {
                     const EdgeInsets.symmetric(horizontal: 15),
                   ),
                 ),
-                child: BottomBar(),
+                child: const BottomBar(),
               ),
             ],
           ),
@@ -119,8 +120,14 @@ class TopBar extends StatelessWidget {
   }
 }
 
-class BottomBar extends StatelessWidget {
-  BottomBar({super.key});
+class BottomBar extends StatefulWidget {
+  const BottomBar({super.key});
+
+  @override
+  State<BottomBar> createState() => _BottomBarState();
+}
+
+class _BottomBarState extends State<BottomBar> with SingleTickerProviderStateMixin {
   final player = StationManager.shared.player;
   @override
   Widget build(BuildContext context) {
@@ -129,48 +136,62 @@ class BottomBar extends StatelessWidget {
         height: 44,
         child: Consumer<StationManager>(
             builder: (context, mgr, child) {
-              Widget content;
+              List<Widget> list;
               if (mgr.station == null) {
-                content = const Text(
+                list = [const Text(
                   'Choose a station above to begin...',
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
                     fontWeight: FontWeight.normal,
                   ),
-                );
+                )];
               } else {
-                content = Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      StreamBuilder(
-                        stream: player.icyMetadataStream,
-                        builder: (context, snapshot) {
-                          return Text(
-                            snapshot.data?.info?.title ?? "",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        },
-                      ),
-                      Text(
-                        mgr.station?.name ?? "",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.normal,
+                list = [
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        StreamBuilder(
+                          stream: player.icyMetadataStream,
+                          builder: (context, snapshot) {
+                            return Text(
+                              snapshot.data?.info?.title ?? "",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                // overflow: TextOverflow.ellipsis,
+                                // decoration: TextDecoration.none,
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                    ],
+                        Text(
+                          mgr.station?.name ?? "",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                );
+                  const SizedBox(width: 8),
+                  StreamBuilder(
+                    stream: mgr.player.playingStream, 
+                    builder: (context, snapshot) {
+                      if (snapshot.data == true) {
+                        return AnimatedPlay();
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
+                ];
               }
-              return Row(children: [content]);
+              return Row(children: list);
             },
           ),
       ),
@@ -194,11 +215,11 @@ class StationCell extends StatelessWidget {
           children: [
             station.imageWidget(),
             const SizedBox(
-              width: 8,
+              width: 11,
             ),
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -206,15 +227,16 @@ class StationCell extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
+                      decoration: TextDecoration.none,
                     ),
                   ),
-                  const SizedBox(height: 12),
                   Text(
                     station.desc,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.normal,
+                      decoration: TextDecoration.none,
                     ),
                   ),
                 ],

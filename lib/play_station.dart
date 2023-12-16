@@ -34,7 +34,7 @@ class _PlayStationPageState extends State<PlayStationPage> {
             children: [
               Container(
                 alignment: Alignment.center,
-                height: 333,
+                height: 400,
                 child: Consumer<StationManager>(
                   builder: (context, mgr, child) {
                     final url = mgr.station?.artworkURL;
