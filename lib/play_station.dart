@@ -1,3 +1,4 @@
+import 'package:bear_radio/station_info.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
@@ -121,7 +122,7 @@ class _PlayStationPageState extends State<PlayStationPage> {
                 ],
               ),
               const SizedBox(height: 22),
-              const BottomBar()
+              BottomBar(station: widget.station)
             ],
           ),
         ),
@@ -131,15 +132,41 @@ class _PlayStationPageState extends State<PlayStationPage> {
 }
 
 class BottomBar extends StatelessWidget {
-  const BottomBar({super.key});
+  const BottomBar({super.key, required this.station});
+  final Station station;
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 44,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Stack(
-          children: [Image.asset('images/btn-share.png')],
-        ));
+      height: 44,
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Row(
+        children: [
+          const Spacer(),
+          IconButton(
+            onPressed: () {},
+            icon: Image.asset('images/btn-share.png'),
+            constraints: BoxConstraints.tight(const Size(44, 44)),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return StationInfoPage(station: station);
+                  },
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.info_outlined,
+              color: Colors.white70,
+            ),
+            constraints: BoxConstraints.tight(const Size(44, 44)),
+          )
+        ],
+      ),
+    );
   }
 }
