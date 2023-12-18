@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -17,7 +16,7 @@ class _AnimatedPlayState extends State<AnimatedPlay> {
   @override
   void initState() {
     timer = Timer.periodic(
-      const Duration(milliseconds: 100), 
+      const Duration(milliseconds: 100),
       (timer) {
         setState(() {
           value = (value + 1) % 4;
@@ -38,14 +37,12 @@ class _AnimatedPlayState extends State<AnimatedPlay> {
     double width = 4;
     double size = width * 3 + 4 * 2;
     var children = <Widget>[];
-    for (int i=0; i<3; i++) {
-      children.add(
-        Container(
-          color: Colors.white,
-          width: width,
-          height: ((value + i) % 4) * size / 3,
-        )
-      );
+    for (int i = 0; i < 3; i++) {
+      children.add(Container(
+        color: Colors.white,
+        width: width,
+        height: ((value + i) % 4) * size / 3,
+      ));
     }
     return SizedBox(
       width: size,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/play_station.dart';
-import 'package:flutter_application_1/station_manager.dart';
+import 'package:bear_radio/play_station.dart';
+import 'package:bear_radio/station_manager.dart';
 import 'package:provider/provider.dart';
 import 'station.dart';
 import 'animated_play.dart';
@@ -12,7 +12,6 @@ class StationListPage extends StatefulWidget {
 }
 
 class _StationListPageState extends State<StationListPage> {
-
   pushPlayPage(Station station) {
     Navigator.push(
       context,
@@ -92,7 +91,6 @@ class _StationListPageState extends State<StationListPage> {
       ],
     );
   }
-
 }
 
 class TopBar extends StatelessWidget {
@@ -127,7 +125,8 @@ class BottomBar extends StatefulWidget {
   State<BottomBar> createState() => _BottomBarState();
 }
 
-class _BottomBarState extends State<BottomBar> with SingleTickerProviderStateMixin {
+class _BottomBarState extends State<BottomBar>
+    with SingleTickerProviderStateMixin {
   final player = StationManager.shared.player;
   @override
   Widget build(BuildContext context) {
@@ -135,65 +134,67 @@ class _BottomBarState extends State<BottomBar> with SingleTickerProviderStateMix
       child: SizedBox(
         height: 44,
         child: Consumer<StationManager>(
-            builder: (context, mgr, child) {
-              List<Widget> list;
-              if (mgr.station == null) {
-                list = [const Text(
+          builder: (context, mgr, child) {
+            List<Widget> list;
+            if (mgr.station == null) {
+              list = [
+                const Text(
                   'Choose a station above to begin...',
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
                     fontWeight: FontWeight.normal,
                   ),
-                )];
-              } else {
-                list = [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        StreamBuilder(
-                          stream: player.icyMetadataStream,
-                          builder: (context, snapshot) {
-                            return Text(
-                              snapshot.data?.info?.title ?? "",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                // overflow: TextOverflow.ellipsis,
-                                // decoration: TextDecoration.none,
-                              ),
-                            );
-                          },
+                )
+              ];
+            } else {
+              list = [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      StreamBuilder(
+                        stream: player.icyMetadataStream,
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.data?.info?.title ?? "",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              // overflow: TextOverflow.ellipsis,
+                              // decoration: TextDecoration.none,
+                            ),
+                          );
+                        },
+                      ),
+                      Text(
+                        mgr.station?.name ?? "",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
                         ),
-                        Text(
-                          mgr.station?.name ?? "",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  StreamBuilder(
-                    stream: mgr.player.playingStream, 
-                    builder: (context, snapshot) {
-                      if (snapshot.data == true) {
-                        return AnimatedPlay();
-                      } else {
-                        return const SizedBox();
-                      }
-                    },
-                  ),
-                ];
-              }
-              return Row(children: list);
-            },
-          ),
+                ),
+                const SizedBox(width: 8),
+                StreamBuilder(
+                  stream: mgr.player.playingStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.data == true) {
+                      return const AnimatedPlay();
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
+                ),
+              ];
+            }
+            return Row(children: list);
+          },
+        ),
       ),
     );
   }
